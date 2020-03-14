@@ -1,1 +1,0 @@
-const square = x => x;
