@@ -218,11 +218,20 @@ export const getMapping = ast => {
       result = result.concat(generateStatement(node.body[0])).flat();
       // result.push(generateStatement(node.body[0])); // JOIN
 
+      // HACK for closing bracket as character node doesnt exist.
+      const endBracketLocation = {
+        start: node.original.loc.end,
+        end: {
+          line: 3,
+          column: 2
+        }
+      };
       mappings.push(
         buildLocation({
           name: "_function_ }",
           lineOffset: 1,
-          source: node.original.loc,
+          // source: node.original.loc,
+          source: endBracketLocation,
           node
         })
       );
