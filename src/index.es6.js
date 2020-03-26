@@ -1,2 +1,3 @@
-const square = x => x;
-window.square = square;
+function add(number) {
+  return number + 1;
+}
