@@ -67,22 +67,22 @@ const mappings = [
   {
     target: {
       start: {
-        column: 0,
-        line: 1
+        line: 1,
+        column: 0
       },
       end: {
-        column: 0,
-        line: 1
+        line: 1,
+        column: 0
       }
     },
     source: {
       start: {
-        column: 0,
-        line: 1
+        line: 1,
+        column: 0
       },
       end: {
-        column: 0,
-        line: 1
+        line: 1,
+        column: 0
       }
     },
     name: "START"
@@ -121,12 +121,12 @@ const buildLocation = ({
   const myMapping = {
     target: {
       start: {
-        column: startColumn,
-        line: startLine
+        line: startLine,
+        column: startColumn
       },
       end: {
-        column: endColumn,
-        line: lastGenerated.end.line + lineOffset
+        line: lastGenerated.end.line + lineOffset,
+        column: endColumn
       }
     },
     source,
