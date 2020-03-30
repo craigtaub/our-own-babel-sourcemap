@@ -156,7 +156,7 @@ const buildLocation = ({
       name
     });
   } else {
-    console.log("a node stayed the same");
+    console.log("a node stayed the same: ", node.name);
   }
 
   return myMapping;
@@ -197,8 +197,12 @@ export const getMapping = ast => {
       } else {
         id = "";
       }
+      const body = generateFunctionBody(node);
 
-      return ["function", space, id].concat(generateFunctionBody(node)); // JOIN
+      // console.log("mappings", mappings[mappings.length - 1].target);
+
+      // block has start + end?
+      return ["function", space, id].concat(body); // JOIN
     },
     BlockStatement: function(node) {
       let result = ["{", newline];
