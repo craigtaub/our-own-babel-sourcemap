@@ -41,4 +41,7 @@ const { mappings, code, mozillaMap } = getMapping(sourceAst);
 mozillaMap.setSourceContent(fileContents); // Is this needed? not sure
 
 // Map from mozillas
-fs.writeFileSync(`./test-runs/index.js.map`, mozillaMap.toString(), "utf8");
+fs.writeFileSync(`./build/index.es5.js.map`, mozillaMap.toString(), "utf8");
+
+// Real module
+fs.writeFileSync(`./build/index.es5.js`, code.join(""), "utf8");

@@ -1,8 +1,0 @@
-{
-    "version": 3,
-    "sources": ["test.es6.js"],
-    "names": [],
-    "mappings": ";;AAAA,IAAM,MAAM,GAAG,SAAT,MAAM,CAAI,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC",
-    "file": "test.js",
-    "sourcesContent": ["const square = (x) => x * x;"]
-}

@@ -4,7 +4,7 @@ const app = express();
 
 const html_string = `
 <html>
-  <script src="/static/file.es5.js"></script>
+  <script src="/static/index.es5.js"></script>
   <body>
     Hello world
   </body>
