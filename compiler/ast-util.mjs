@@ -2,6 +2,7 @@ import sourceMap from "source-map";
 // const SourceMapGenerator = require("source-map").SourceMapGenerator;
 
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
+
 /*
  * Depth-first search
  *
@@ -60,6 +61,57 @@ export const cloneOriginalOnAst = ast => {
     const clone = Object.assign({}, node);
     node.original = clone;
   });
+};
+
+/*
+ * Help with Node properties is https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API
+ * DONT flatten on cloned, as want to update that AST, not flattened.
+ */
+export const flattenTokens = ast => {
+  const flattenedTokens = [];
+  ast.body.map(current => {
+    // process each body to help us separate by block/line
+    const row = [];
+    visit(current, node => {
+      if (node.type) {
+        const item = {
+          type: node.type
+          // ALWAYS: location, original
+          // SOMETIMES: operator, name, value
+        };
+        if (node.value) {
+          item.value = node.value;
+        }
+        if (node.name) {
+          item.name = node.name;
+        }
+        if (node.operator) {
+          item.operator = node.operator;
+        }
+        if (node.loc) {
+          item.location = node.loc;
+        }
+        // item.original = Object.assign({}, item);
+
+        // Not needed. Its the identifier
+        // if (node.params) {
+        //   item.params = node.params;
+        // }
+        // Not needed. Its the left identifier + right literal
+        // if (node.argument) {
+        //   item.argument = node.argument;
+        // }
+
+        // if (node.type === "FunctionDeclaration") {
+        //   console.log("FunctionDeclaration", node);
+        // }
+        row.push(item);
+      }
+    });
+
+    flattenedTokens.push(row);
+  });
+  return flattenedTokens;
 };
 
 // target
@@ -140,6 +192,14 @@ const buildLocation = ({
   const clonedNode = Object.assign({}, node);
   delete clonedNode.original; // only useful for check against original
   const original = node.original;
+
+  // function needs to end line 1 column 1....its a block
+  // if (name === "function") {
+  //   console.log("node", clonedNode.loc);
+  //   console.log("original", original.loc);
+  // }
+
+  // WITHOUT THIS entire first line shows as changed
   if (JSON.stringify(clonedNode) !== JSON.stringify(original)) {
     // console.log("real mapping", name);
     // console.log("original", original);
@@ -241,6 +301,7 @@ export const getMapping = ast => {
       );
 
       result.push("}");
+      result.push("\n");
       return result;
     },
     ReturnStatement: function(node) {
@@ -336,9 +397,42 @@ export const getMapping = ast => {
     },
     Identifier: function(node) {
       return generateIdentifier(node);
+    },
+    ExpressionStatement: function(node) {
+      const result = generateExpression(node.expression); // was []
+      result.push(";");
+      return result;
+    },
+    AssignmentExpression: function(node, precedence) {
+      return generateAssignment(
+        node.left,
+        node.right,
+        node.operator,
+        precedence
+      );
+    },
+    MemberExpression: function(node, precedence) {
+      const result = [generateExpression(node.object)];
+      result.push(".");
+      result.push(generateIdentifier(node.property));
+      return parenthesize(result, 19, precedence);
     }
   };
   // Node processors
+  function parenthesize(text, current, should) {
+    if (current < should) {
+      return ["(", text, ")"];
+    }
+    return text;
+  }
+  const generateAssignment = (left, right, operator, precedence) => {
+    const expression = [
+      generateExpression(left),
+      space + operator + space,
+      generateExpression(right)
+    ];
+    return parenthesize(expression, 1, precedence).flat(); // FLATTEN
+  };
   const generateIdentifier = id => {
     mappings.push(
       buildLocation({
@@ -400,60 +494,13 @@ export const getMapping = ast => {
   let code;
   if (ast.type === "Program") {
     ast.body.map(astBody => {
-      code = Statements[astBody.type](astBody);
+      if (code) {
+        code = code.concat(Statements[astBody.type](astBody));
+      } else {
+        code = Statements[astBody.type](astBody);
+      }
     });
   }
 
   return { mappings, code, mozillaMap };
-};
-
-/*
- * Help with Node properties is https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API
- * DONT flatten on cloned, as want to update that AST, not flattened.
- */
-export const flattenTokens = ast => {
-  const flattenedTokens = [];
-  ast.body.map(current => {
-    // process each body to help us separate by block/line
-    const row = [];
-    visit(current, node => {
-      if (node.type) {
-        const item = {
-          type: node.type
-          // ALWAYS: location, original
-          // SOMETIMES: operator, name, value
-        };
-        if (node.value) {
-          item.value = node.value;
-        }
-        if (node.name) {
-          item.name = node.name;
-        }
-        if (node.operator) {
-          item.operator = node.operator;
-        }
-        if (node.loc) {
-          item.location = node.loc;
-        }
-        // item.original = Object.assign({}, item);
-
-        // Not needed. Its the identifier
-        // if (node.params) {
-        //   item.params = node.params;
-        // }
-        // Not needed. Its the left identifier + right literal
-        // if (node.argument) {
-        //   item.argument = node.argument;
-        // }
-
-        // if (node.type === "FunctionDeclaration") {
-        //   console.log("FunctionDeclaration", node);
-        // }
-        row.push(item);
-      }
-    });
-
-    flattenedTokens.push(row);
-  });
-  return flattenedTokens;
 };

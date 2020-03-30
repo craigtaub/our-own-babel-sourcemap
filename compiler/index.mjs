@@ -43,5 +43,11 @@ mozillaMap.setSourceContent(fileContents); // Is this needed? not sure
 // Map from mozillas
 fs.writeFileSync(`./build/index.es5.js.map`, mozillaMap.toString(), "utf8");
 
+// Add sourcemap location
+code.push("\n");
+code.push("//# sourceMappingURL=/static/index.es5.js.map");
+
 // Real module
 fs.writeFileSync(`./build/index.es5.js`, code.join(""), "utf8");
+fs.writeFileSync(`./build/index.es6.js`, fileContents, "utf8");
+// needs it. not sure "setSourceContent" is useful
