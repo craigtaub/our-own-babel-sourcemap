@@ -10,33 +10,14 @@ const SourceMapGenerator = sourceMap.SourceMapGenerator;
  * If array (will b of nodes) iterate and call traverse(item)
  * If object call traverse(item)
  */
-const ignoredKeys = ["loc"]; //, "start", "end", "sourceType"];
-// const sortingArr = [
-//   "type",
-//   "id",
-//   "params",
-//   "body",
-//   "name",
-//   "value",
-//   "operator",
-//   "loc"
-//   // argument??
-// ];
 export function visit(ast, callback) {
   callback(ast);
 
   const keys = Object.keys(ast);
-  // keys.sort(function(a, b) {
-  //   return sortingArr.indexOf(a) - sortingArr.indexOf(b);
-  // });
-  // const filteredKeys = keys.filter(key => !ignoredKeys.includes(key));
   for (let i = 0; i < keys.length; i++) {
     const keyName = keys[i];
     const child = ast[keyName];
-    if (ignoredKeys.includes(keyName)) {
-      // dont process
-      return;
-    }
+    if (keyName === "loc") return;
     if (Array.isArray(child)) {
       for (let j = 0; j < child.length; j++) {
         visit(child[j], callback);
@@ -46,7 +27,6 @@ export function visit(ast, callback) {
     }
   }
 }
-
 function isNode(node) {
   return typeof node === "object" && node.type;
 }
@@ -120,24 +100,12 @@ export const flattenTokens = ast => {
 const mappings = [
   {
     target: {
-      start: {
-        line: 1,
-        column: 0
-      },
-      end: {
-        line: 1,
-        column: 0
-      }
+      start: { line: 1, column: 0 },
+      end: { line: 1, column: 0 }
     },
     source: {
-      start: {
-        line: 1,
-        column: 0
-      },
-      end: {
-        line: 1,
-        column: 0
-      }
+      start: { line: 1, column: 0 },
+      end: { line: 1, column: 0 }
     },
     name: "START"
   }
