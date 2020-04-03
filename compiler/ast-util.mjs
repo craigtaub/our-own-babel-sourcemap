@@ -1,5 +1,4 @@
 import sourceMap from "source-map";
-// const SourceMapGenerator = require("source-map").SourceMapGenerator;
 
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 
@@ -431,7 +430,6 @@ const generateStatement = node => {
 const generateFunctionBody = node => {
   const result = generateFunctionParams(node);
   return result.concat(generateStatement(node.body)); // if block generateStatement
-  // result.push(generateStatement(node.body)); // JOIN
 };
 const generateExpression = node => {
   const result = Statements[node.type](node);
