@@ -119,22 +119,24 @@ const mozillaMap = new SourceMapGenerator({
 /*
  * Determine lication.
  * NOTE: doesnt use END for sourcemap, but useful for our processing.
+ *
+ * Get last generated details
+ * If line offset
+ *  set end column to current column
+ *  reset column to 0
+ *  increment current line
  */
 const buildLocation = ({
-  colOffset = 0,
-  lineOffset = 0,
-  name,
-  source,
-  node
+  colOffset = 0, lineOffset = 0, name, source, node
 }) => {
   let endColumn;
   let startColumn;
   let startLine;
   const lastGenerated = mappings[mappings.length - 1].target;
+  const endLine = lastGenerated.end.line + lineOffset;
   if (lineOffset) {
-    // If new line reset column
     endColumn = colOffset;
-    startColumn = 0;
+    startColumn = 0; // If new line reset column
     startLine = lastGenerated.end.line + lineOffset;
   } else {
     endColumn = lastGenerated.end.column + colOffset;
@@ -142,53 +144,32 @@ const buildLocation = ({
     startLine = lastGenerated.end.line;
   }
 
-  const myMapping = {
-    target: {
-      start: {
-        line: startLine,
-        column: startColumn
-      },
-      end: {
-        line: lastGenerated.end.line + lineOffset,
-        column: endColumn
-      }
+  const target = {
+    start: {
+      line: startLine,
+      column: startColumn
     },
-    source,
-    name
+    end: {
+      line: endLine,
+      column: endColumn
+    }
   };
+  node.loc = target;  // Update node with new location
 
-  // update node with new location
-  node.loc = myMapping.target;
-
-  // Map if nodes have changed
   const clonedNode = Object.assign({}, node);
-  delete clonedNode.original; // only useful for check against original
+  delete clonedNode.original; // Only useful for check against original
   const original = node.original;
-
-  // function needs to end line 1 column 1....its a block
-  // if (name === "function") {
-  //   console.log("node", clonedNode.loc);
-  //   console.log("original", original.loc);
-  // }
-
-  // WITHOUT THIS entire first line shows as changed
   if (JSON.stringify(clonedNode) !== JSON.stringify(original)) {
-    // console.log("real mapping", name);
-    // console.log("original", original);
-    // console.log("clonedNode", clonedNode);
-
-    // push to real mapping..it just wants START. END is for me managing state
+    // Push to real mapping. Just START. END is for me managing state
     mozillaMap.addMapping({
       generated: {
-        line: myMapping.target.start.line,
-        column: myMapping.target.start.column
+        line: target.start.line,
+        column: target.start.column
       },
       source: sourceFile,
-      original: myMapping.source.start,
+      original: source.start
       name
     });
-  } else {
-    console.log("a node stayed the same: ", node.name);
   }
 
   return myMapping;

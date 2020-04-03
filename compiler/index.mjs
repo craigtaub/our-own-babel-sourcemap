@@ -18,16 +18,19 @@ cloneOriginalOnAst(sourceAst);
 
 // 2. update AST.
 // usually a API calls would do this.
-// swap "number + 1"
+// Swap: "number + 1"
+// - clone left node
 const leftClone = Object.assign(
   {},
   sourceAst.body[0].body.body[0].argument.left
 );
+// - replace left node with right node
 sourceAst.body[0].body.body[0].argument.left =
   sourceAst.body[0].body.body[0].argument.right;
+// - replace right node with left clone
 sourceAst.body[0].body.body[0].argument.right = leftClone;
-
-// now "1 + number". loc is wrong
+// Now: "1 + number"
+//loc is wrong
 // console.log(
 //   sourceAst.body[0].body.body[0].argument.left,
 //   sourceAst.body[0].body.body[0].argument.right
@@ -47,7 +50,6 @@ fs.writeFileSync(`./build/index.es5.js.map`, mozillaMap.toString(), "utf8");
 code.push("\n");
 code.push("//# sourceMappingURL=/static/index.es5.js.map");
 
-// Real module
 fs.writeFileSync(`./build/index.es5.js`, code.join(""), "utf8");
 fs.writeFileSync(`./build/index.es6.js`, fileContents, "utf8");
 // needs it. not sure "setSourceContent" is useful
