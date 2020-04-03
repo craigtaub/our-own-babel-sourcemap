@@ -1,23 +1,31 @@
-Turn `file.es6.js` into `file.es5.js` + `file.es5.js.map`
+# Our own babel sourcemaps
 
-# Compiler rules
+Test application, contains a small JS code generation compiler. Transform small subset of JS AST into real code and produce the source map.
 
-"Store current generated position with source position"
+## Transformation
 
-As generate each new line, if mappable, store source line/column and generated line/column, together
+Change:
 
-1. Transform
+```javascript
+function add(number) {
+  return number + 1;
+}
+```
 
-- const change to var
-- arrow function change to expression
-- Implicit return become explicit
+Into:
 
-2. Don't map Keywords, only
+```javascript
+function add(number) {
+  return 1 + number;
+}
+```
 
-- variable itself
-- function contents
-- WHY: think as tricky and useless to track
+## Usage
 
-3. Use AST so we can grab line and column numbers easily
+`npm run compile`
 
-console.log("NEW: ", JSON.stringify(ast.parse(`hello`)));
+Compile `src/index.es6.js` into `/build` with updated file and source map.
+
+`npm run start`
+
+Compile and start simple express server loading JS assets.
