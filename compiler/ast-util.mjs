@@ -126,7 +126,11 @@ const mozillaMap = new SourceMapGenerator({
  *  increment current line
  */
 const buildLocation = ({
-  colOffset = 0, lineOffset = 0, name, source, node
+  colOffset = 0,
+  lineOffset = 0,
+  name,
+  source,
+  node
 }) => {
   let endColumn;
   let startColumn;
@@ -153,7 +157,7 @@ const buildLocation = ({
       column: endColumn
     }
   };
-  node.loc = target;  // Update node with new location
+  node.loc = target; // Update node with new location
 
   const clonedNode = Object.assign({}, node);
   delete clonedNode.original; // Only useful for check against original
@@ -166,12 +170,12 @@ const buildLocation = ({
         column: target.start.column
       },
       source: sourceFile,
-      original: source.start
+      original: source.start,
       name
     });
   }
 
-  return myMapping;
+  return { target };
 };
 
 /*
